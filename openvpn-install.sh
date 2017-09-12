@@ -87,11 +87,16 @@ allow-query { localnets; };
 EOF
     systemctl restart named
   fi
+  
+  sed -i "s/nameserver/# nameserver/" /etc/resolv.conf
+  echo "nameserver 127.0.0.1" >> /etc/resolv.conf
 }
 
 removeLocalDNS() {
   # Remove config lines added in setup 
-  sed -z "s/\n\s*listen-on { 127.0.0.1; $IP; };\n\s*recursion yes;\n\s*allow-query { localnets; };//" /etc/bind/named.conf.options
+  sed -zi "s/\n\s*listen-on { 127.0.0.1; $IP; };\n\s*recursion yes;\n\s*allow-query { localnets; };//" /etc/bind/named.conf.options
+  sed -i "s/nameserver 127.0.0.1//"
+  sed -i "s/# nameserver/nameserver/"
   
   if [[ "$OS" == 'debian' ]]; then
     apt-get remove -y bind9
